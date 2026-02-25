@@ -1,9 +1,9 @@
 import { basekit, FieldType, field, FieldComponent, FieldCode, NumberFormatter, AuthorizationType } from '@lark-opdev/block-basekit-server-api';
 const { t } = field;
 
-const feishuDm = ['feishu.cn', 'feishucdn.com', 'larksuitecdn.com', 'larksuite.com','api.chatfire.cn','api.xunkecloud.cn','test.xunkecloud.cn'];
+const feishuDm = ['feishu.cn', 'feishucdn.com', 'larksuitecdn.com', 'larksuite.com','api.chatfire.cn','api.xunkecloud.cn','test.xunkecloud.cn','ai.ysapi.cloud'];
 // 通过addDomainList添加请求接口的域名，不可写多个addDomainList，否则会被覆盖
-basekit.addDomainList([...feishuDm, 'api.exchangerate-api.com',]);
+basekit.addDomainList([...feishuDm, 'api.exchangerate-api.com']);
 
 basekit.addField({
   // 定义捷径的i18n语言资源
@@ -44,7 +44,7 @@ basekit.addField({
       platform: 'xunkecloud',
       type: AuthorizationType.HeaderBearerToken,
       required: true,
-      instructionsUrl: "http://api.xunkecloud.cn/login",
+      instructionsUrl: "https://api.xunkecloud.cn/login",
       label: '关联账号',
       icon: {
         light: '',
@@ -139,7 +139,7 @@ basekit.addField({
 
     
     // 常量定义
-    const API_BASE_URL = 'http://api.xunkecloud.cn/v1/videos';
+    const API_BASE_URL = 'https://api.xunkecloud.cn/v1/videos';
     const POLLING_INTERVAL = 5000; // 5秒间隔
     const MAX_POLLING_TIME = 900000; // 900秒最大等待时间
 
@@ -165,9 +165,9 @@ basekit.addField({
     try {
       // 构建请求体
       const requestBody: any = {
-        model: videoMethod.value,
-        prompt: videoPrompt,
-        seconds: seconds.value,
+        "model": videoMethod.value,
+        "prompt": videoPrompt,
+        "seconds": seconds.value,
         size: size.value
       };
 

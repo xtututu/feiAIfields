@@ -69,7 +69,7 @@ basekit.addField({
           { label: t('modelBrand') +' SR-2-stb', value: 'sora-2-stable'},
           { label: t('modelBrand') +' gr-6s', value: 'grok-video-3'},
           { label: t('modelBrand') +' gr-10s', value: 'grok-video-3-10s'},
-
+          { label: t('modelBrand') +' gr-15s', value: 'grok-video-3-15s'},
         ]
       },
     },
@@ -172,7 +172,7 @@ basekit.addField({
         size: size.value
       };
 
-      if (videoMethod.value === 'grok-video-3' || videoMethod.value === 'grok-video-3-10s') {
+      if (videoMethod.value.includes('grok')) {
         delete requestBody.seconds;
         
         if (size.value === '720x1280' || size.value === '1024x1792') {
