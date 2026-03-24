@@ -60,7 +60,11 @@ basekit.addField({
           { label: t('modelBrand') +' Na-Pro', value: 'nano-banana-pro'},
           { label: t('modelBrand') +' Na-Pro-1K', value: 'nano-banana-pro_1K'},
           { label: t('modelBrand') +' Na-Pro-2k', value: 'nano-banana-pro_2k'},
-          { label: t('modelBrand') +' Na-Pro-4k', value: 'nano-banana-pro_4k'}
+          { label: t('modelBrand') +' Na-Pro-4k', value: 'nano-banana-pro_4k'},
+          { label: t('modelBrand') +' Na-Ba2-0.5K', value: 'nano-banana2-0.5K'},
+          { label: t('modelBrand') +' Na-Ba2-1K', value: 'nano-banana2-1K'},
+          { label: t('modelBrand') +' Na-Ba2-2K', value: 'nano-banana2-2K'},
+          { label: t('modelBrand') +' Na-Ba2-4K', value: 'nano-banana2-4K'},
         ]
       },
     },
@@ -133,12 +137,16 @@ basekit.addField({
       OVERRUN: 'https://pay.xunkecloud.cn/image/Overrun.mp4',
       NO_CHANNEL: 'https://pay.xunkecloud.cn/image/unusual.mp4',
       INSUFFICIENT: 'https://pay.xunkecloud.cn/image/Insufficient.mp4',
-      INVALID_TOKEN: 'https://pay.xunkecloud.cn/image/tokenError.mp4'
+      INVALID_TOKEN: 'https://pay.xunkecloud.cn/image/tokenError.mp4',
+      TIME_FAILED: 'https://pay.xunkecloud.cn/image/timeFailed.png',
+      PROMPT_ERROR: 'https://pay.xunkecloud.cn/image/promtErr.mp4',
     };
 
     try {
-      // 创建错误响应的辅助函数
-  
+      // 检查提示词是否为空
+      if (!imagePrompt || imagePrompt.trim() === '') {        
+        return createErrorResponse('提示词必填', ERROR_VIDEOS.PROMPT_ERROR) ;
+      }
 
 const createImageUrl = `https://api.xunkecloud.cn/v1/images/generations` 
       
@@ -245,10 +253,17 @@ const createImageUrl = `https://api.xunkecloud.cn/v1/images/generations`
         return createErrorResponse('无效的令牌', ERROR_VIDEOS.INVALID_TOKEN);
       }
 
+      console.log("==========");
+      
       // 未知错误
       return {
-        code: FieldCode.Error
-      };
+      code: FieldCode.Success,
+      data: [{
+        name: 'timeFailed.png',
+        content: ERROR_VIDEOS.TIME_FAILED,
+        contentType: 'attachment/url'
+      }]
+    };
     }
   }
 });

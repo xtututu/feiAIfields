@@ -1,6 +1,36 @@
 import { basekit, FieldType, field, FieldComponent, FieldCode,AuthorizationType } from '@lark-opdev/block-basekit-server-api';
 const { t } = field;
 
+interface APIError {
+  message: string;
+  code: string;
+  type: string;
+}
+
+interface APIChoice {
+  message: {
+    content: string;
+  };
+}
+
+interface APISuccessResponse {
+  choices: APIChoice[];
+}
+
+interface APIErrorResponse {
+  error: APIError;
+}
+
+type APIResponse = APISuccessResponse | APIErrorResponse;
+
+function isAPIErrorResponse(response: any): response is APIErrorResponse {
+  return response && typeof response === 'object' && 'error' in response;
+}
+
+function isAPISuccessResponse(response: any): response is APISuccessResponse {
+  return response && typeof response === 'object' && 'choices' in response && Array.isArray(response.choices);
+}
+
 // 配置允许的服务商域名
 const allowedDomains = [
   'api.xunkecloud.cn'
@@ -116,7 +146,6 @@ basekit.addField({
     try {
       // API请求地址
       const apiUrl = 'https://api.xunkecloud.cn/plus/v1/chat/completions';
-      console.log(refAtt);
       
       
       // 发送文件上传请求（如果有文件）
@@ -132,7 +161,7 @@ basekit.addField({
         };
         
         const uploadResponse = await context.fetch(uploadUrl, uploadOptions, 'auth_id_1');
-        const uploadResult = await uploadResponse.json();
+        const uploadResult: any = await uploadResponse.json();
 
         console.log('文件上传结果:', uploadResult);
         
@@ -181,16 +210,12 @@ console.log(requestOptions);
       
       // 发送API请求
       const response = await context.fetch(apiUrl, requestOptions, 'auth_id_1');
-      const result = await response.json();
+      const result: any = await response.json();
       console.log(
         'API响应:', result
       );
       
-      // console.log(result.choices[0].message.content);
-      
-      // 检查错误
-      if (result.error) {
-        
+      if (isAPIErrorResponse(result)) {
         debugLog({
           type: 'error',
           message: result.error.message,
@@ -205,14 +230,20 @@ console.log(requestOptions);
         };
       }
       
-      
-      // 返回结果
-      const aiResult = result.choices[0].message.content;
-      console.log(aiResult);
+      if (isAPISuccessResponse(result)) {
+        const aiResult = result.choices[0].message.content;
+        console.log(aiResult);
+        
+        return {
+          code: FieldCode.Success,
+          data: aiResult
+        };
+      }
       
       return {
         code: FieldCode.Success,
-        data: aiResult
+        data: 'AI服务异常，请稍后重试～',
+        msg: '服务异常！'
       };
     } catch (error) {
       console.error('执行错误:', error);
