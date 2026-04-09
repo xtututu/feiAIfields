@@ -14,7 +14,7 @@ basekit.addField({
         'refImage': '参考图片',
         'modelBrand':'迅客',
         'aspectRatio': '图像比例',
-
+        'genQty': '生成数量',
       },
       'en-US': {
         'videoMethod': 'Model selection',
@@ -22,6 +22,7 @@ basekit.addField({
         'refImage': 'Reference image',
         'modelBrand':'Xunke',
         'aspectRatio': 'Aspect ratio',
+        'genQty': '生成数量',
       },
       'ja-JP': {
         'videoMethod': '画像生成方式',
@@ -29,6 +30,7 @@ basekit.addField({
         'refImage': '参考画像',
         'modelBrand':'迅客',
         'aspectRatio': '画像比例',
+        'genQty': '生成数量',
       },
     }
   },
@@ -61,7 +63,6 @@ basekit.addField({
           { label: t('modelBrand') +' Na-Pro-1K', value: 'nano-banana-pro_1K'},
           { label: t('modelBrand') +' Na-Pro-2k', value: 'nano-banana-pro_2k'},
           { label: t('modelBrand') +' Na-Pro-4k', value: 'nano-banana-pro_4k'},
-          { label: t('modelBrand') +' Na-Ba2-0.5K', value: 'nano-banana2-0.5K'},
           { label: t('modelBrand') +' Na-Ba2-1K', value: 'nano-banana2-1K'},
           { label: t('modelBrand') +' Na-Ba2-2K', value: 'nano-banana2-2K'},
           { label: t('modelBrand') +' Na-Ba2-4K', value: 'nano-banana2-4K'},
@@ -84,6 +85,7 @@ basekit.addField({
       label: t('refImage'),
       component: FieldComponent.FieldSelect,
       props: {
+        mode: 'multiple',
         supportType: [FieldType.Attachment],
       }
     },
@@ -108,6 +110,21 @@ basekit.addField({
         ]
       },
     },
+    {
+      key: 'genQty',
+      label: t('genQty'),
+      component: FieldComponent.SingleSelect,
+      defaultValue: { label: '1', value: '1'},
+      props: {
+        options: [
+          { label:"1", value:"1"},
+          { label:"2", value:"2"},
+          { label:"3", value:"3"},
+          { label:"4", value:"4"},
+          { label:"5", value:"5"}
+        ]
+      },
+    }
   ],
 
   resultType: {
@@ -115,7 +132,7 @@ basekit.addField({
   },
 
   execute: async (formItemParams, context) => {
-    const { videoMethod, imagePrompt, refImage, aspectRatio } = formItemParams;
+    const { videoMethod, imagePrompt, refImage, aspectRatio, genQty } = formItemParams;
     let englishPrompt = imagePrompt;
 
     function debugLog(arg: any) {
@@ -142,6 +159,42 @@ basekit.addField({
       PROMPT_ERROR: 'https://pay.xunkecloud.cn/image/promtErr.mp4',
     };
 
+            function extractAllTmpUrls(data) {
+    // 存储所有提取到的 tmp_url
+    const tmpUrlList = [];
+
+    // 递归遍历函数
+    function traverse(currentData) {
+        // 跳过 null/undefined
+        if (currentData === null || typeof currentData === 'undefined') {
+            return;
+        }
+
+        // 如果是对象（数组/普通对象）
+        if (typeof currentData === 'object') {
+            // 检查当前对象是否有有效 tmp_url
+            if (
+                'tmp_url' in currentData && 
+                typeof currentData.tmp_url === 'string' && 
+                currentData.tmp_url.trim()
+            ) {
+                tmpUrlList.push(currentData.tmp_url.trim());
+            }
+
+            // 遍历所有子元素（跳过原型链属性）
+            for (const key in currentData) {
+                if (currentData.hasOwnProperty(key)) {
+                    traverse(currentData[key]);
+                }
+            }
+        }
+    }
+
+    // 开始遍历传入的数据
+    traverse(data);
+    // 返回去重后的数组（可选：如果需要去重则加，不需要则直接返回 tmpUrlList）
+    return [...new Set(tmpUrlList)];
+}
     try {
       // 检查提示词是否为空
       if (!imagePrompt || imagePrompt.trim() === '') {        
@@ -149,94 +202,74 @@ basekit.addField({
       }
 
 const createImageUrl = `https://api.xunkecloud.cn/v1/images/generations` 
-      
-      
-      // 提取图片链接函数
-      function extractImageUrls(imageData: any): string[] {
-        
-        if (!imageData || !Array.isArray(imageData)) {
-          return [];
-        }
-        
-        const urls: string[] = [];
-        
-        imageData.forEach((item: any) => {
-          if (item.tmp_url) {
-            // 清理URL中的反引号和空格
-            const cleanUrl = item.tmp_url.replace(/[`\s]/g, '');
-            urls.push(cleanUrl);
-          }
-        });
-        
-        return urls;
-      }
 
-      let taskResp;
       
-    
         const jsonRequestOptions = {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
             model: videoMethod.value,
             "prompt": imagePrompt,
-            "image": extractImageUrls(refImage),
+            "image": extractAllTmpUrls(refImage),
             "response_format":"url",
-            "aspect_ratio": aspectRatio.value
+            "aspect_ratio": aspectRatio.value,
+            "picType":"jpg"
           })
         };
 
+        console.log(jsonRequestOptions);
         
-        
-        taskResp = await context.fetch(createImageUrl, jsonRequestOptions, 'auth_id_1');
+     const quantity = parseInt(genQty?.value || genQty || '1', 10);
+    
+    // 创建并发请求
+    const promises = Array.from({ length: quantity }, async (_, index) => {
+      const taskResp = await context.fetch(createImageUrl, jsonRequestOptions, 'auth_id_1');
       
-
       if (!taskResp) {
-        throw new Error('请求未能成功发送');
+        throw new Error(`请求 ${index + 1} 未能成功发送`);
       }
 
-      debugLog({'=1 图片创建接口结果': taskResp});
+      debugLog({ [`=1 图片创建接口结果 ${index + 1}`]: taskResp});
       
       if (!taskResp.ok) {
-        const errorData = await taskResp.json().catch(() => ({}));
-        console.error('API请求失败:', taskResp.status, errorData);
+        const errorData: any = await taskResp.json().catch(() => ({}));
+        console.error(`API请求 ${index + 1} 失败:`, taskResp.status, errorData);
         
         // 检查HTTP错误响应中的无效令牌错误
         if (errorData.error && errorData.error.message ) {
-          
           throw new Error(errorData.error.message);
         }
         
-        throw new Error(`API请求失败: ${taskResp.status} ${taskResp.statusText}`);
+        throw new Error(`API请求 ${index + 1} 失败: ${taskResp.status} ${taskResp.statusText}`);
       }
       
-      const initialResult = await taskResp.json();
+      const result: any = await taskResp.json();
 
       
       // 检查API返回的余额耗尽错误
-      
-      
-      if (!initialResult || !initialResult.data || !Array.isArray(initialResult.data) || initialResult.data.length === 0) {
-        throw new Error('API响应数据格式不正确或为空');
+      if (!result || !result.data || !Array.isArray(result.data) || result.data.length === 0) {
+        throw new Error(`API响应 ${index + 1} 数据格式不正确或为空`);
       }
       
-      
-      // let chatfireNanoUrl = initialResult.data[0].url;
-      let imageUrl = initialResult.data[0].url;
-
-
-      console.log('imageUrl:', imageUrl);
+      return result.data[0].url;
+    });
+    
+    // 等待所有请求完成
+    const imageUrls = await Promise.all(promises);
+    console.log('All image URLs:', imageUrls);
+    
+    // 构建返回数据
+    const data = imageUrls.map((url, index) => ({
+      name: `image_${index + 1}.jpg`,
+      content: url,
+      contentType: "attachment/url"
+    }));
 
       return {
           code: FieldCode.Success, // 0 表示请求成功
           // data 类型需与下方 resultType 定义一致
-          data:[{
-              name:  'image.png',
-              content: imageUrl,
-              contentType: "attachment/url"
-            }]
+          data: data
         };
-
     } catch (error: any) {
      const errorMessage = String(error);
       debugLog({ '异常错误': errorMessage });

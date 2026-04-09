@@ -141,6 +141,7 @@ basekit.addField({
           prompt: imagePrompt,
           response_format: "url",
           aspect_ratio: aspectRatio.value,
+          picType:"jpg"
         };
         
         const imageUrls = extractImageUrls(refImage);
@@ -192,32 +193,6 @@ basekit.addField({
       // let chatfireNanoUrl = initialResult.data[0].url;
       let imageUrl = initialResult.data[0].url;
 
-      
-      
-      // if (!chatfireNanoUrl) {
-      //   throw new Error('未获取到图片URL');
-      // }
-      
-      // // 调用上传接口
-      
-      //   const uploadUrl = 'https://api.xunkecloud.cn/api/file/upload';
-      //   const uploadOptions = {
-      //     method: 'POST',
-      //     headers: {'Content-Type': 'application/json'},
-      //     body: JSON.stringify({
-      //       file_url: chatfireNanoUrl
-      //     })
-      //   };
-        
-      //   debugLog({'=2 调用上传接口': {uploadUrl, chatfireNanoUrl}});
-      //   let uploadResp = await context.fetch(uploadUrl, uploadOptions);
-
-      //   const uploadResult = await uploadResp.json();
-        
-       
-
-      // let imageUrl = "https://api.xunkecloud.cn"+uploadResult.file_url;
-
       console.log('imageUrl:', imageUrl);
 
       const url = [
@@ -238,7 +213,7 @@ basekit.addField({
             }
             const name = link.split('/').slice(-1)[0];
             return {
-              name:  name+'.png',
+              name:  name+'.jpg',
               content: link,
               contentType: "attachment/url"
             }
