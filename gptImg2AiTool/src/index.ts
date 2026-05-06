@@ -9,7 +9,7 @@ basekit.addField({
   i18n: {
     messages: {
       'zh-CN': {
-        'videoMethod': '模型选择',
+        'model':"模型选项",
         'imagePrompt': '提示词',
         'refImage': '参考图片',
         'modelBrand':'迅客',
@@ -17,7 +17,7 @@ basekit.addField({
         'genQty': '生成数量',
       },
       'en-US': {
-        'videoMethod': 'Model selection',
+        'model':"Model options",
         'imagePrompt': 'Image editing prompt',
         'refImage': 'Reference image',
         'modelBrand':'Xunke',
@@ -25,12 +25,11 @@ basekit.addField({
         'genQty': '生成数量',
       },
       'ja-JP': {
-        'videoMethod': '画像生成方式',
+        'model':"モデルオプション",
         'imagePrompt': '画像編集提示詞',
         'refImage': '参考画像',
         'modelBrand':'迅客',
         'aspectRatio': '画像比例',
-        'genQty': '生成数量',
       },
     }
   },
@@ -38,7 +37,7 @@ basekit.addField({
   authorizations: [
     {
       id: 'auth_id_1',
-      platform: 'xunkecloud',
+      platform: 'base',
       type: AuthorizationType.HeaderBearerToken,
       required: true,
       instructionsUrl: "http://api.xunkecloud.cn/login",
@@ -51,23 +50,16 @@ basekit.addField({
   ],
 
   formItems: [ 
-     {
-      key: 'videoMethod',
-      label: t('videoMethod'),
+    {
+      key: 'model',
+      label: t('model'),
       component: FieldComponent.SingleSelect,
-      defaultValue: { label: t('modelBrand') +' Na', value: 'nano-banana'},
+      defaultValue: { label: 'gpt-image-2', value: 'gpt-image-2'},
       props: {
         options: [
-          { label: t('modelBrand') +' Image-2', value: 'gpt-image-2'},
-          { label: t('modelBrand') +' Na', value: 'nano-banana'},
-          { label: t('modelBrand') +' Na-Pro', value: 'nano-banana-pro'},
-          { label: t('modelBrand') +' Na-Pro-1K', value: 'nano-banana-pro_1K'},
-          { label: t('modelBrand') +' Na-Pro-2k', value: 'nano-banana-pro_2k'},
-          { label: t('modelBrand') +' Na-Pro-4k', value: 'nano-banana-pro_4k'},
-          { label: t('modelBrand') +' Na-Ba2-1K', value: 'nano-banana2-1K'},
-          { label: t('modelBrand') +' Na-Ba2-2K', value: 'nano-banana2-2K'},
-          { label: t('modelBrand') +' Na-Ba2-4K', value: 'nano-banana2-4K'},
-
+          { label: 'gpt-image-2', value: 'gpt-image-2'},
+          { label: 'gpt-image-2-2K', value: 'gpt-image-2-2K'},
+          { label: 'gpt-image-2-4K', value: 'gpt-image-2-4K'},
         ]
       },
     },
@@ -98,17 +90,20 @@ basekit.addField({
       defaultValue: { label: 'auto', value: 'auto'},
       props: {
         options: [
-          { label: 'auto', value: 'auto'},
-          { label: '1:1', value: '1:1'},
-          { label: '16:9', value: '16:9'},
-          { label: '9:16', value: '9:16'},
-          { label: '4:3', value: '4:3'},
-          { label: '3:4', value: '3:4'},
-          { label: '3:2', value: '3:2'},
-          { label: '2:3', value: '2:3'},
-          { label: '5:4', value: '5:4'},
-          { label: '4:5', value: '4:5'},
-          { label: '21:9', value: '21:9'},
+          { label: 'auto', value: 'auto' },
+          { label: '1:1', value: '1:1' },
+          { label: '3:2', value: '3:2' },
+          { label: '2:3', value: '2:3' },
+          { label: '16:9', value: '16:9' },
+          { label: '9:16', value: '9:16' },
+          { label: '4:3', value: '4:3' },
+          { label: '3:4', value: '3:4' },
+          { label: '21:9', value: '21:9' },
+          { label: '9:21', value: '9:21' },
+          { label: '1:3', value: '1:3' },
+          { label: '3:1', value: '3:1' },
+          { label: '2:1', value: '2:1' },
+          { label: '1:2', value: '1:2' }
         ]
       },
     },
@@ -134,7 +129,7 @@ basekit.addField({
   },
 
   execute: async (formItemParams, context) => {
-    const { videoMethod, imagePrompt, refImage, aspectRatio, genQty } = formItemParams;
+    const { model, imagePrompt, refImage, aspectRatio, genQty } = formItemParams;
     let englishPrompt = imagePrompt;
 
     function debugLog(arg: any) {
@@ -210,7 +205,7 @@ const createImageUrl = `https://api.xunkecloud.cn/v1/images/generations`
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            model: videoMethod.value,
+            model: model.value,
             "prompt": imagePrompt,
             "image": extractAllTmpUrls(refImage),
             "response_format":"url",

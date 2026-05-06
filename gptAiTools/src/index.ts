@@ -88,21 +88,28 @@ basekit.addField({
       key: 'modelSelection',
       label: t('modelSelection'),
       component: FieldComponent.SingleSelect,
-      defaultValue: { label: t('modelBrand') + ' GT-5', value: 'gpt-5'},
+      defaultValue: { label: t('modelBrand') + ' GM-3.1-pro', value: 'gemini-3.1-pro-preview'},
       props: {
         options: [
-          // 对话模型 - Gemini 系列
-          { label:  t('modelBrand') + ' GM-2.5-pro', value: 'gemini-2.5-pro'},
-          { label:  t('modelBrand') + ' GM-3-pro', value: 'gemini-3-pro'},
-          { label:  t('modelBrand') + ' GT-5', value: 'gpt-5'},
-          { label:  t('modelBrand') + ' GT-5.1', value: 'gpt-5.1'},
-          { label:  t('modelBrand') + ' GT-5.2', value: 'gpt-5.2'},
-          { label:  t('modelBrand') + ' GT-5-mini', value: 'gpt-5-mini'},
-          { label:  t('modelBrand') + ' GT-5-thinking', value: 'gpt-5-thinking'},
-          { label:  t('modelBrand') + ' GT-5-nano', value: 'gpt-5-nano'},
-          { label:  t('modelBrand') + ' GT-4o-mini', value: 'gpt-4o-mini'},
+            { label: t('modelBrand') + ' GM-2.5-pro', value: 'gemini-2.5-pro' },
+            { label: t('modelBrand') + ' GM-3-pro', value: 'gemini-3-pro-preview' },
+            { label: t('modelBrand') + ' GM-3.1-pro', value: 'gemini-3.1-pro-preview' },
+            { label: t('modelBrand') + ' GT-5', value: 'gpt-5' },
+            { label: t('modelBrand') + ' GT-5.1', value: 'gpt-5.1' },
+            { label: t('modelBrand') + ' GT-5.2', value: 'gpt-5.2' },
+            { label: t('modelBrand') + ' GT-5.4', value: 'gpt-5.4' },
+            { label: t('modelBrand') + ' GT-5-mini', value: 'gpt-5-mini' },
+            { label: t('modelBrand') + ' GT-5-thinking', value: 'gpt-5-thinking' },
+            { label: t('modelBrand') + ' GT-5-nano', value: 'gpt-5-nano' },
+            { label: t('modelBrand') + ' GT-4o-mini', value: 'gpt-4o-mini' },
         ]
       },
+       tooltips: [
+        {
+          type: 'text',
+          content: '仅gemini 模型支持视频理解'
+        }
+      ],
     },
     {
       key: 'inputCommand',
@@ -145,7 +152,7 @@ basekit.addField({
 
     try {
       // API请求地址
-      const apiUrl = 'https://api.xunkecloud.cn/plus/v1/chat/completions';
+      const apiUrl = 'http://api.xunkecloud.cn/v1/chat/completions';
       
       
       // 发送文件上传请求（如果有文件）
@@ -173,24 +180,7 @@ basekit.addField({
 
       // 构建请求消息
       const messages = [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: inputCommand
-            },
-            // 添加附件URL（如果存在）
-            ...(fileUrl ? [
-              {
-                type: 'file_url',
-                file_url: {
-                  url: fileUrl
-                }
-              }
-            ] : [])
-          ]
-        }
+        
       ];
 
       

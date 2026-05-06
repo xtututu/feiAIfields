@@ -66,6 +66,9 @@ basekit.addField({
           { label: t('modelBrand') +' SR-2', value: 'sora-2'},
           { label: t('modelBrand') +' gr-6s', value: 'grok-video-3'},
           { label: t('modelBrand') +' gr-10s', value: 'grok-video-3-10s'},
+          { label: t('modelBrand') +' gr-15s', value: 'grok-video-3-15s'},
+          { label: t('modelBrand') +' gr-20s', value: 'grok-video-3-20s'},
+          { label: t('modelBrand') +' gr-30s', value: 'grok-video-3-30s'},
           { label: 'doubao-seedance-1-5-pro_480p', value: 'doubao-seedance-1-5-pro_480p'},
           { label: 'doubao-seedance-1-5-pro_720p', value: 'doubao-seedance-1-5-pro_720p'},
           { label: 'doubao-seedance-1-5-pro_1080p', value: 'doubao-seedance-1-5-pro_1080p'},
@@ -297,10 +300,14 @@ basekit.addField({
       if (videoMethod.value.includes('grok')) {
         delete requestBody.seconds;
         
-        if (size.value === 'adaptive' || size.value === '720x1280' || size.value === '1024x1792' || size.value === '1:1'  || size.value === '9:16'  || size.value === '3:4' ) {
+        if (size.value === 'adaptive' ) {
+          requestBody.size = '1:1';
+        }else if(size.value === '3:4'){
           requestBody.size = '2:3';
-        }else{
+        }else if(size.value === '4:3'){
           requestBody.size = '3:2';
+        }else if(size.value === '21:9'){
+          requestBody.size = '16:9';
         }
       }
 
